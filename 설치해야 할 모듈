@@ -2,5 +2,5 @@ npm i express, path, app-root-path, bcrypt, body-parser, dotenv, morgan, mysql, 
 
 vscode 터미널 창에 복붙
 
-서버 실행 방법: 터미널 창에 cd app 입력 후 npdempn app.js 입력
+서버 실행 방법: 터미널 창에 cd app 입력 후 nodemon app.js 입력
 node.js 설치 필수
