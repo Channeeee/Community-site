@@ -1,0 +1,111 @@
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333; /* 다크 테마 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #fff;
+}
+
+.signup-container {
+    background-color: #444;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+}
+
+h1 {
+    color: #ffcc00;
+    margin-bottom: 20px;
+}
+
+.logo {
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus {
+    border-color: #ffcc00;
+    outline: none;
+}
+
+input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffcc00;
+    color: #333;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+input[type="submit"]:hover {
+    background-color: #ffdd44;
+}
+
+input[type="submit"]:active {
+    background-color: #ffbb00;
+}
+
+.birth-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.birth-inputs input,
+.birth-inputs select {
+    flex: 1;
+}
+
+span {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.icon-lock {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: #999;
+}
