@@ -1,0 +1,3 @@
+npm i express, path, app-root-path, bcrypt, body-parser, dotenv, morgan, mysql, winston
+
+vscode 터미널 창에 복붙
