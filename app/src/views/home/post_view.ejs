@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 보기</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #333; /* 다크 테마 */
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        .header {
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            text-align: left;
+        }
+
+        .header a.logo {
+            font-size: 30px;
+            color: #ffcc00;
+            font-weight: bold;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .separator {
+            border-top: 2px solid #ffcc00; /* 구분선 */
+            margin-bottom: 20px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #444; /* 다크 배경 */
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .post-header {
+            margin-bottom: 20px;
+        }
+
+        .post-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffcc00; /* 노란색 제목 */
+        }
+
+        .post-meta {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .post-content {
+            font-size: 18px;
+            color: #ddd;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .button-scrap {
+            background-color: #ffcc00;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .button-list {
+            background-color: #999;
+            color: #fff;
+        }
+
+        /* 수정된 쪽지 보내기 버튼 색상 */
+        .button-message {
+            background-color: #ffcc00; /* 페이지와 어울리는 노란색 */
+            color: #333;
+            font-weight: bold;
+            position: absolute;
+            top: 20px;  /* 오른쪽 상단 위치 설정 */
+            right: 20px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .comment-section {
+            margin-top: 30px;
+        }
+
+        .comment-section textarea {
+            width: 97%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #555;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 10px;
+            resize: none;
+        }
+
+        .comment-section button {
+            padding: 10px 20px;
+            background-color: #ffcc00;
+            color: #333;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #ffcc00; /* 포커스 시 노란색 테두리 */
+            outline: none;
+        }
+
+        .comment-section button:hover {
+            opacity: 0.9;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #444;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .modal-footer button {
+            background-color: #ffcc00;
+            color: #333;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 쪽지 내용 입력 칸의 포커스 스타일 */
+        textarea#messageContent {
+            width: 100%; /* 가로 길이를 늘림 */
+            height: 150px; /* 높이는 적당히 유지 */
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #fff;
+            box-sizing: border-box; /* 패딩과 보더 포함한 크기 계산 */
+            resize: none;
+        }
+
+        /* 포커스 시 테두리를 노란색으로 */
+        textarea#messageContent:focus {
+            border-color: #ffcc00; /* 포커스 시 노란색 테두리 */
+            outline: none;
+        }
+
+        /* 경고 모달 스타일 */
+        .modal-alert {
+            display: none;
+            position: fixed;
+            z-index: 2;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .alert-content {
+            background-color: #ff4444;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .alert-content h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .alert-content button {
+            background-color: #fff;
+            color: #ff4444;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .header a:hover{
+            color: whitesmoke
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 헤더: KUCIS 로고 -->
+    <div class="header">
+        <a href="/login" class="logo">KUCIS</a>
+    </div>
+
+    <!-- 구분선 -->
+    <div class="separator"></div>
+
+    <!-- 게시물 내용 컨테이너 -->
+    <div class="container">
+        <div class="post-header">
+            <div class="post-title" id="postTitle">게시글 제목</div>
+            <div class="post-meta" id="postMeta"></div>
+        </div>
+
+        <div class="post-content" id="postContent">
+            게시글 내용이 여기에 표시됩니다.
+        </div>
+
+        <div class="form-actions">
+            <!-- 스크랩 및 글 목록 버튼 -->
+            <button class="button-scrap" onclick="scrapPost()">스크랩</button>
+            <button class="button-list" onclick="location.href='community.html'">글 목록</button>
+        </div>
+
+        <div class="comment-section">
+            <textarea id="comment" rows="4" placeholder="댓글을 입력하세요."></textarea>
+            <button>댓글 작성</button>
+        </div>
+
+        <!-- 쪽지 보내기 버튼 -->
+        <button class="button-message" onclick="openMessageModal()">쪽지 보내기</button>
+    </div>
+
+    <!-- 쪽지 보내기 모달 -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">쪽지 보내기</div>
+            <textarea id="messageContent" placeholder="쪽지 내용을 입력하세요."></textarea>
+            <div class="modal-footer">
+                <button onclick="sendMessage()">보내기</button>
+                <button onclick="closeMessageModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 경고 모달 -->
+    <div id="alertModal" class="modal-alert">
+        <div class="alert-content">
+            <p>쪽지 내용을 입력해주세요!</p>
+            <button onclick="closeAlertModal()">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // URL에서 게시글 ID를 받아옴
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+
+        // 로컬스토리지에서 게시글 목록을 불러옴
+        const posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+        // 해당 ID에 맞는 게시글을 찾음
+        const post = posts[postId];
+
+        // 게시글 제목과 내용 표시
+        document.getElementById('postTitle').innerText = post.title;
+        document.getElementById('postMeta').innerText = post.anonymous + ' | ' + new Date().toLocaleTimeString();
+        document.getElementById('postContent').innerText = post.content;
+
+        // 스크랩 기능 구현
+        function scrapPost() {
+            // 기존 스크랩 목록 불러오기
+            let scraps = JSON.parse(localStorage.getItem('scraps')) || [];
+
+            // 중복 스크랩 방지 (이미 스크랩된 게시글이 있는지 확인)
+            if (scraps.some(scrap => scrap.title === post.title)) {
+                alert('이미 스크랩된 게시글입니다.');
+                return;
+            }
+
+            // 스크랩 추가
+            scraps.push(post);
+            localStorage.setItem('scraps', JSON.stringify(scraps));
+
+            alert('게시글이 스크랩되었습니다.');
+        }
+
+        // 쪽지 모달 열기
+        function openMessageModal() {
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        // 쪽지 모달 닫기
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        // 경고 모달 열기
+        function openAlertModal() {
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        // 경고 모달 닫기
+        function closeAlertModal() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        // 쪽지 전송 기능
+        function sendMessage() {
+            const messageContent = document.getElementById('messageContent').value;
+
+            if (!messageContent) {
+                openAlertModal(); // 경고 모달 열기
+                return;
+            }
+
+            // 작성자에게 쪽지 전송 (로컬스토리지에 저장하는 방식으로 구현)
+            let messages = JSON.parse(localStorage.getItem('messages')) || [];
+            messages.push({
+                to: post.anonymous,
+                content: messageContent,
+                date: new Date().toLocaleString(),
+            });
+
+            localStorage.setItem('messages', JSON.stringify(messages));
+
+            alert('쪽지가 전송되었습니다.');
+            closeMessageModal();
+        }
+    </script>
+
+</body>
+</html>
