@@ -109,3 +109,15 @@ span {
     transform: translateY(-50%);
     color: #999;
 }
+
+a{
+    text-decoration: none;
+}
+
+a:visited{
+    color: #ffcc00;
+}
+
+a:hover{
+    color: greenyellow;
+}
