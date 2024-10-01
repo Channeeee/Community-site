@@ -1,4 +1,5 @@
 GET
+<<<<<<< Updated upstream
 POST
 GET
 GET
@@ -12,6 +13,8 @@ GET
 GET
 GET
 GET
+=======
+>>>>>>> Stashed changes
 GET
 GET
 GET
