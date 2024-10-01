@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게시물 작성</title>
+    <title>글 작성</title>
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
+            background-color: #333;
             margin: 0;
             padding: 0;
-            background-color: #333; /* 다크 테마 */
             color: #fff;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
         }
 
         .header {
@@ -32,7 +29,7 @@
         }
 
         .separator {
-            border-top: 2px solid #ffcc00; /* 구분선 */
+            border-top: 2px solid #ffcc00;
             margin-bottom: 20px;
         }
 
@@ -40,44 +37,49 @@
             width: 80%;
             max-width: 900px;
             margin: 0 auto;
-            background-color: #444; /* 다크 배경 */
+            background-color: #444;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 20px;
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        input[type="text"],
-        textarea {
+        .form-group label {
+            font-size: 18px;
+            color: #ffcc00;
+        }
+
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #555;
-            background-color: #555; /* 입력 필드 배경 */
+            background-color: #555;
             color: #fff;
             font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        input[type="text"]:focus,
-        textarea:focus {
-            border-color: #ffcc00; /* 포커스 시 노란색 테두리 */
-            outline: none;
-        }
-
-        textarea {
-            height: 200px;
+            margin-top: 5px;
             resize: none;
         }
 
         .form-actions {
-            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
 
-        button {
+        .form-actions button {
             padding: 10px 20px;
             font-size: 16px;
             border: none;
@@ -86,13 +88,12 @@
             margin-left: 10px;
         }
 
-        .submit-btn {
+        .button-submit {
             background-color: #ffcc00;
             color: #333;
-            font-weight: bold;
         }
 
-        .cancel-btn {
+        .button-cancel {
             background-color: #999;
             color: #fff;
         }
@@ -101,9 +102,12 @@
             opacity: 0.9;
         }
 
-        .header a:hover{
-            color: whitesmoke
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #ffcc00;
+            outline: none;
         }
+
     </style>
 </head>
 <body>
@@ -116,21 +120,63 @@
     <!-- 구분선 -->
     <div class="separator"></div>
 
-    <!-- 글 작성 폼 컨테이너 -->
+    <!-- 게시글 작성 폼 컨테이너 -->
     <div class="container">
-        <form action="/submit-post" method="post">
-            <div class="form-group">
-                <input type="text" id="title" name="title" placeholder="글 제목" required>
-            </div>
-            <div class="form-group">
-                <textarea id="content" name="content" placeholder="내용을 입력하세요." required></textarea>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="submit-btn">작성</button>
-                <button type="reset" class="cancel-btn">취소</button>
-            </div>
-        </form>
+        <div class="form-title">글 작성</div>
+
+        <div class="form-group">
+            <label for="title">글 제목</label>
+            <input type="text" id="title" placeholder="글 제목을 입력하세요.">
+        </div>
+
+        <div class="form-group">
+            <label for="content">내용</label>
+            <textarea id="content" rows="10" placeholder="내용을 입력하세요."></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button class="button-submit" onclick="submitPost()">작성</button> <!-- 이벤트 추가 -->
+            <button class="button-cancel" onclick="cancelForm()">취소</button>
+        </div>
     </div>
+
+    <script>
+        // 취소 버튼 클릭 시 동작
+        function cancelForm() {
+            if (confirm("글 작성을 취소하시겠습니까?")) {
+                window.location.href = "/community";  // 글 목록으로 리디렉션
+            }
+        }
+
+        // 작성 버튼 클릭 시 동작
+        function submitPost() {
+            const title = document.getElementById("title").value;
+            const content = document.getElementById("content").value;
+
+            if (!title || !content) {
+                alert("제목과 내용을 모두 입력해주세요.");
+                return;
+            }
+
+            fetch('/board/write', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, content }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("게시글이 작성되었습니다.");
+                    window.location.href = '/community';  // 작성 후 글 목록으로 이동
+                } else {
+                    alert("게시글 작성에 실패했습니다.");
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
 
 </body>
 </html>
