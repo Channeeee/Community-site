@@ -16,30 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `posts`
+-- Table structure for table `message_list`
 --
 
-DROP TABLE IF EXISTS `posts`;
+DROP TABLE IF EXISTS `message_list`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `posts` (
-  `postnum` int NOT NULL DEFAULT '1',
-  `id` varchar(30) NOT NULL DEFAULT 'kucis',
-  `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`postnum`)
+CREATE TABLE `message_list` (
+  `roomid` int NOT NULL,
+  `postnum` varchar(45) NOT NULL,
+  `sender` varchar(45) NOT NULL,
+  `reciper` varchar(45) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`roomid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `posts`
+-- Dumping data for table `message_list`
 --
 
-LOCK TABLES `posts` WRITE;
-/*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,'june','첫글','11111','2024-10-02 00:00:00'),(2,'chan','둘','22222222','2024-10-02 00:00:00');
-/*!40000 ALTER TABLE `posts` ENABLE KEYS */;
+LOCK TABLES `message_list` WRITE;
+/*!40000 ALTER TABLE `message_list` DISABLE KEYS */;
+INSERT INTO `message_list` VALUES (1,'1','june','chan','2024-10-02 00:00:00'),(2,'1','chan','june','2024-10-02 00:00:00'),(3,'2','suck','chan','2024-10-02 00:00:00');
+/*!40000 ALTER TABLE `message_list` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

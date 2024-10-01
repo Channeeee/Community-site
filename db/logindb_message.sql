@@ -25,9 +25,10 @@ DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message` (
   `messageid` int NOT NULL DEFAULT '1',
   `roomid` int NOT NULL DEFAULT '1',
-  `postid` int NOT NULL DEFAULT '1',
-  `send_time` datetime DEFAULT NULL,
+  `postnum` int NOT NULL DEFAULT '1',
+  `send_time` datetime NOT NULL,
   `sender` varchar(45) NOT NULL DEFAULT '1',
+  `reciper` varchar(45) NOT NULL DEFAULT '1',
   `content` varchar(45) NOT NULL DEFAULT '1',
   PRIMARY KEY (`messageid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -39,6 +40,7 @@ CREATE TABLE `message` (
 
 LOCK TABLES `message` WRITE;
 /*!40000 ALTER TABLE `message` DISABLE KEYS */;
+INSERT INTO `message` VALUES (1,1,1,'2024-10-02 00:00:00','chan','1','hi'),(2,1,1,'2024-10-02 00:01:00','june','1','hiii');
 /*!40000 ALTER TABLE `message` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-01 23:23:40
+-- Dump completed on 2024-10-02  0:46:30
