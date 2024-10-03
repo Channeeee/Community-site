@@ -1,5 +1,4 @@
 "use strict";
-
 //모듈
 const express = require("express");
 const app = express();
@@ -8,7 +7,8 @@ const bodyParser = require('body-parser');
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const fs = require('fs');
-
+const cookieParser = require('cookie-parser');
+const nunjucks = require('nunjucks');
 
 dotenv.config()
 
@@ -29,8 +29,35 @@ app.use(express.static(path.join(__dirname, 'src', 'public')));
 app.use(express.static(path.join(__dirname, 'src', 'views')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
-app.use(morgan(":method", {stream: accessLogStream}));
+app.use(morgan(":method", {stream: accessLogStream}, 'dev'));
 app.use("/", home);
+
+nunjucks.configure('./src/views', {
+    express: app,
+    watch: true,
+    });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/', (req, res) => {
+    const { id } = req.cookies;
+    if(id){
+        res.render('login', { id });
+        return;
+    }
+    
+    res.render('index')
+})
+
+app.post('/', (req, res) => {
+    const { name } = req.body;
+    res.cookie('id', name).redirect('/');
+})
+
+app.get('/delete', (req, res) => {
+    res.clearCookie('id').redirect('/')
+})
 
 module.exports = app;
