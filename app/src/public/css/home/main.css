@@ -167,3 +167,15 @@ nav ul li a {
 .post #button:focus{
     color: #ffbb00;
 }
+
+.logout a {
+    position: relative;
+    left: 95%;
+    text-decoration: none;
+    list-style-type: none;
+    color: #ffcc00;
+}
+
+.logout a:hover {
+    color: #fff;
+}
