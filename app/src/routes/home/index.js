@@ -20,6 +20,6 @@ router.post("/login", ctrl.process.login);
 router.post("/register", ctrl.process.register);
 
 // 게시글 삭제 처리
-router.delete("/delete-post/:id", ctrl.process.deletePost);
+router.delete("/delete-post/:postnum", ctrl.process.deletePost);
 
 module.exports = router;

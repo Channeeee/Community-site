@@ -154,7 +154,7 @@
     <div class="container">
         <div class="post-header">
             <div class="post-title" id="postTitle"><%= post.title %></div>
-            <div class="post-meta"><%= post.author %> | <%= new Date(post.created_at).toLocaleString() %></div>
+            <div class="post-meta"><%= post.id %> | <%= new Date(post.created_at).toLocaleString() %></div>
         </div>
 
         <div class="post-content" id="postContent">
@@ -165,9 +165,10 @@
             <!-- 스크랩, 글 목록, 삭제 버튼 -->
             <button class="button-scrap" onclick="scrapPost()">스크랩</button>
             <button class="button-list" onclick="location.href='/community'">글 목록</button>
-            <button class="button-delete" onclick="deletePost('<%= post.id %>')">삭제</button>
+            <button class="button-delete" onclick="deletePost('<%= post.postnum %>')">삭제</button>
         </div>
 
+        
         <div class="comment-section">
             <textarea id="comment" rows="4" placeholder="댓글을 입력하세요."></textarea>
             <button>댓글 작성</button>
