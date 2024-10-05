@@ -2,6 +2,7 @@
 
 const User = require("../../models/User");
 const PostStorage = require("../../models/PostStorage");
+const MessageStorage = require("../../models/MessageStorage"); // MessageStorage를 불러옵니다.
 
 const output = {
   home: (req, res) => {
@@ -20,13 +21,19 @@ const output = {
     res.render("home/register");
   },
 
-  message: (req, res) => {
-    res.render("home/message");
+  message: async (req, res) => {
+    try {
+      const messages = await MessageStorage.getMessages(); // 모든 쪽지 데이터를 가져옵니다.
+      res.render("home/message", { messages }); // 가져온 쪽지 데이터를 EJS에 전달합니다.
+    } catch (err) {
+      console.error("쪽지 리스트 불러오기 오류:", err);
+      res.status(500).send("서버 오류 발생");
+    }
   },
 
   postView: (req, res) => {
-    const postId = req.query.id;  // URL에서 postnum을 가져옴
-    console.log("postId:", postId);  // postId 값 출력 확인
+    const postId = req.query.id; // URL에서 postnum을 가져옴
+    console.log("postId:", postId); // postId 값 출력 확인
 
     if (!postId) {
       return res.status(400).send("잘못된 요청입니다.");
@@ -85,7 +92,7 @@ const process = {
   writePost: async (req, res) => {
     try {
       const { title, content } = req.body; // 클라이언트에서 전송된 게시글 제목과 내용
-      const id = "사용자 이름"; 
+      const id = "사용자 이름";
       const post = { title, content, id }; // 게시글 데이터 구성
 
       await PostStorage.savePost(post); // 게시글을 DB에 저장P
@@ -98,15 +105,15 @@ const process = {
 
   deletePost: async (req, res) => {
     try {
-        const postId = req.params.postnum; // URL에서 삭제할 게시글의 postnum을 가져옴
-        console.log("Deleting post with postnum:", postId); // 로그 추가
-        await PostStorage.deletePost(postId); // 해당 postnum의 게시글을 삭제
-        res.json({ success: true }); // 삭제 성공 시 JSON 형식으로 응답
+      const postId = req.params.postnum; // URL에서 삭제할 게시글의 postnum을 가져옴
+      console.log("Deleting post with postnum:", postId); // 로그 추가
+      await PostStorage.deletePost(postId); // 해당 postnum의 게시글을 삭제
+      res.json({ success: true }); // 삭제 성공 시 JSON 형식으로 응답
     } catch (err) {
-        console.error("게시글 삭제 오류:", err);
-        res.status(500).json({ success: false, message: "게시글 삭제 실패" }); // 삭제 실패 시 오류 메시지 반환
+      console.error("게시글 삭제 오류:", err);
+      res.status(500).json({ success: false, message: "게시글 삭제 실패" }); // 삭제 실패 시 오류 메시지 반환
     }
-},
+  },
 };
 
 module.exports = {
