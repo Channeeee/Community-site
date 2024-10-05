@@ -1,0 +1,115 @@
+/* 전체 레이아웃 */
+.chat-container {
+  width: 80%;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+h2 {
+  color: #ffcc00;
+  font-size: 24px;
+}
+
+.back-button {
+  color: #4a90e2;
+  text-decoration: none;
+  margin-bottom: 15px;
+  display: block;
+}
+
+/* 채팅 메시지 영역 */
+.chat-messages {
+  height: 400px;
+  overflow-y: auto;
+  background-color: #222;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 60%;
+  word-wrap: break-word;
+  font-size: 16px;
+  position: relative;
+}
+
+/* 내가 보낸 메시지 (오른쪽) */
+.message-sender {
+  align-self: flex-end;
+  background-color: #ffcc00;
+  color: #333;
+  border-radius: 15px 15px 0 15px;
+  text-align: right;
+}
+
+/* 상대방이 보낸 메시지 (왼쪽) */
+.message-recipient {
+  align-self: flex-start;
+  background-color: #4a4a4a;
+  color: white;
+  border-radius: 15px 15px 15px 0;
+  text-align: left;
+}
+
+/* 메시지 시간 */
+.message small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #ccc;
+  position: absolute;
+  bottom: -18px;
+  right: 10px;
+}
+
+/* 메시지 입력 영역 */
+.chat-input {
+  display: flex;
+  gap: 10px;
+  background-color: #222;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: #444;
+  color: #fff;
+  font-size: 16px;
+}
+
+.chat-input input::placeholder {
+  color: #ccc;
+}
+
+.chat-input button {
+  padding: 12px 20px;
+  background-color: #ffcc00;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #333;
+  font-size: 16px;
+}
+
+.chat-input button:hover {
+  background-color: #e6b800;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border: 1px solid #ffcc00;
+}

@@ -26,7 +26,15 @@
           <span class="message-time"><%= message.created_at %></span>
           <!-- 쪽지 시간 -->
           <div class="message-actions">
-            <button class="button-view">보기</button>
+            <!-- roomid를 쿼리 파라미터로 전달하여 message_chat으로 이동 -->
+            <form method="get" action="/message_chat">
+              <input
+                type="hidden"
+                name="roomid"
+                value="<%= message.roomid %>"
+              />
+              <button type="submit" class="button-view">보기</button>
+            </form>
             <button class="button-delete">삭제</button>
           </div>
         </li>

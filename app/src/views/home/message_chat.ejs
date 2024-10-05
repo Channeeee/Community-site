@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>채팅방</title>
+    <link rel="stylesheet" href="/css/home/message_chat.css" />
+  </head>
+  <body>
+    <div class="chat-container">
+      <h2>채팅방 (Room ID: <%= roomid %>)</h2>
+
+      <div class="chat-messages">
+        <% if (messages.length > 0) { %> <% messages.forEach(function(message) {
+        %>
+        <div
+          class="<%= message.sender === '내_아이디' ? 'message-sender' : 'message-recipient' %>"
+        >
+          <span
+            ><strong><%= message.sender %>:</strong> <%= message.content
+            %></span
+          ><br />
+          <small><%= message.send_time %></small>
+        </div>
+        <% }); %> <% } else { %>
+        <p>대화 내용이 없습니다.</p>
+        <% } %>
+      </div>
+
+      <div class="chat-input">
+        <form method="post" action="/message/chat/send">
+          <input type="hidden" name="roomid" value="<%= roomid %>" />
+          <input
+            type="text"
+            name="content"
+            placeholder="메시지를 입력하세요..."
+          />
+          <button type="submit">전송</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

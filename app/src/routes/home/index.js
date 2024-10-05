@@ -12,6 +12,8 @@ router.get("/register", ctrl.output.register);
 router.get("/post_view", ctrl.output.postView);
 router.get("/community", ctrl.output.community);
 router.get("/message", ctrl.output.message);
+router.get("/message_chat", ctrl.output.messageChat);
+router.post("/message/chat/send", ctrl.process.sendMessage);
 
 // POST 요청 처리 추가
 router.post("/board/write", ctrl.process.writePost); // board/write 경로 추가

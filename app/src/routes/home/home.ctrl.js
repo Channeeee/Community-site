@@ -66,6 +66,27 @@ const output = {
       res.status(500).send("서버 오류 발생");
     }
   },
+
+  messageChat: async (req, res) => {
+    const roomid = req.query.roomid;
+    const userid = req.cookies.userid; // 로그인한 사용자 ID 가져오기
+
+    if (!roomid) {
+      return res.status(400).send("잘못된 요청입니다.");
+    }
+
+    try {
+      let messages = await MessageStorage.getMessagesByRoomId(roomid);
+      res.render("home/message_chat", {
+        messages,
+        roomid,
+        user: { id: userid },
+      });
+    } catch (err) {
+      console.error("메시지 조회 오류:", err);
+      res.status(500).send("서버 오류 발생");
+    }
+  },
 };
 
 const process = {
@@ -117,6 +138,37 @@ const process = {
     } catch (err) {
       console.error("게시글 삭제 오류:", err);
       res.status(500).json({ success: false, message: "게시글 삭제 실패" }); // 삭제 실패 시 오류 메시지 반환
+    }
+  },
+  sendMessage: async (req, res) => {
+    const { roomid, content } = req.body;
+    const sender = req.cookies.userid; // 로그인한 사용자 ID 가져오기
+
+    // 필수 값 체크
+    if (!content || !roomid || !sender) {
+      return res.status(400).send("메시지 내용 또는 방 ID가 누락되었습니다.");
+    }
+
+    try {
+      const postnum = 1; // 현재 포스트 번호를 실제로 설정해야 합니다.
+
+      // reciper를 message_list에서 찾기
+      const reciper = await MessageStorage.getReciperByRoomId(roomid, sender);
+
+      // DB에 메시지 저장
+      await MessageStorage.createMessage(
+        roomid,
+        postnum,
+        sender,
+        reciper,
+        content
+      );
+
+      // 저장 후 해당 채팅방으로 리다이렉트
+      res.redirect(`/message_chat?roomid=${roomid}`); // URL 수정: /message_chat -> /message/chat
+    } catch (err) {
+      console.error("메시지 저장 오류:", err);
+      res.status(500).send("서버 오류 발생");
     }
   },
 };
