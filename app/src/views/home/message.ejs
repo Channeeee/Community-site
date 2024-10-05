@@ -21,7 +21,7 @@
         <% if (messages.length > 0) { %> <% messages.forEach(function(message) {
         %>
         <li class="message-item">
-          <span class="message-title"><%= message.postnum %></span>
+          <span class="message-title"><%= message.message_title %></span>
           <!-- 쪽지 제목 -->
           <span class="message-time"><%= message.created_at %></span>
           <!-- 쪽지 시간 -->

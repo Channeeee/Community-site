@@ -23,8 +23,13 @@ const output = {
 
   message: async (req, res) => {
     try {
-      const messages = await MessageStorage.getMessages(); // 모든 쪽지 데이터를 가져옵니다.
-      res.render("home/message", { messages }); // 가져온 쪽지 데이터를 EJS에 전달합니다.
+      const userid = req.cookies.userid; // 쿠키에서 userid 값을 가져옴
+      if (!userid) {
+        return res.status(401).send("로그인이 필요합니다."); // 로그인되지 않은 경우 처리
+      }
+
+      const messages = await MessageStorage.getMessagesForUser(userid); // 해당 사용자의 쪽지 가져오기
+      res.render("home/message", { messages }); // 가져온 쪽지 데이터를 EJS에 전달
     } catch (err) {
       console.error("쪽지 리스트 불러오기 오류:", err);
       res.status(500).send("서버 오류 발생");
