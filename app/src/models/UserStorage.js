@@ -12,6 +12,7 @@ class UserStorage {
         });
     });
 }
+
     static async save (userInfo) {
         return new Promise((resolve, reject) =>{
         const query = "INSERT INTO users(id, psword, name) VALUES(?,?,?);"
@@ -24,5 +25,4 @@ class UserStorage {
     });
 }
 }
-
 module.exports = UserStorage;
