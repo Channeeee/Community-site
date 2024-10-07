@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 
 app.post("/", (req, res) => {
   const { name } = req.body;
-  res.cookie("id", name).redirect("/");
+  res.cookie("userid", name).redirect("/");
 });
 
 app.get("/delete", (req, res) => {
