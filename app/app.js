@@ -8,6 +8,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
+const nunjucks = require('nunjucks');
 
 dotenv.config();
 
