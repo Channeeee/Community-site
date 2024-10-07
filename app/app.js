@@ -8,7 +8,6 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const fs = require("fs");
 const cookieParser = require("cookie-parser");
-const nunjucks = require('nunjucks');
 
 dotenv.config();
 
@@ -34,12 +33,6 @@ app.use(morgan(":method", { stream: accessLogStream }, "dev"));
 app.use("/", home);
 
 // ------------------------ 쿠키 ----------------------- //
-
-nunjucks.configure('./src/views', {
-    express: app,
-    watch: true,
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
