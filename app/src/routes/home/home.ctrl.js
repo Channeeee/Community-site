@@ -3,7 +3,6 @@
 const User = require("../../models/User");
 const PostStorage = require("../../models/PostStorage");
 const MessageStorage = require("../../models/MessageStorage"); // MessageStorage를 불러옵니다.
-const { formatTime } = require("../../public/js/home/time");
 
 const output = {
   home: (req, res) => {
@@ -69,36 +68,22 @@ const output = {
   },
 
   messageChat: async (req, res) => {
-    const roomid = req.query.roomid; // URL에서 roomid 가져오기
-    const sender = req.cookies.userid; // 로그인한 사용자 ID 가져오기
+    const roomid = req.query.roomid;
+    const userid = req.cookies.userid; // 로그인한 사용자 ID 가져오기
 
-    // roomid와 sender 값 검증
-    if (!roomid || !sender) {
+    if (!roomid) {
       return res.status(400).send("잘못된 요청입니다.");
     }
 
     try {
-      // 해당 roomid에 메시지를 가져오기
       let messages = await MessageStorage.getMessagesByRoomId(roomid);
-
-      // 메시지가 없을 경우 기본값으로 새 메시지 생성
-      if (messages.length === 0) {
-        await MessageStorage.createMessage(
-          roomid,
-          1, // 기본 postnum, 나중에 실제 postnum으로 변경 필요
-          sender,
-          "상대방_아이디", // 실제 상대방 ID로 변경 필요
-          "첫 번째 메시지" // 기본 메시지
-        );
-
-        // 새로 생성된 메시지를 다시 조회
-        messages = await MessageStorage.getMessagesByRoomId(roomid);
-      }
-
-      // 조회된 메시지를 렌더링
-      res.render("home/message_chat", { messages, roomid, sender });
+      res.render("home/message_chat", {
+        messages,
+        roomid,
+        user: { id: userid },
+      });
     } catch (err) {
-      console.error("메시지 조회/생성 오류:", err);
+      console.error("메시지 조회 오류:", err);
       res.status(500).send("서버 오류 발생");
     }
   },
@@ -171,7 +156,13 @@ const process = {
       const reciper = await MessageStorage.getReciperByRoomId(roomid, sender);
 
       // DB에 메시지 저장
-      await MessageStorage.createMessage(roomid, postnum, sender, content);
+      await MessageStorage.createMessage(
+        roomid,
+        postnum,
+        sender,
+        reciper,
+        content
+      );
 
       // 저장 후 해당 채팅방으로 리다이렉트
       res.redirect(`/message_chat?roomid=${roomid}`); // URL 수정: /message_chat -> /message/chat
