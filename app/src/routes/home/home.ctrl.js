@@ -153,7 +153,7 @@ const process = {
   writePost: async (req, res) => {
     try {
       const { title, content } = req.body; // 클라이언트에서 전송된 게시글 제목과 내용
-      const id = "사용자 이름";
+      const id = req.cookies.userid;
       const post = { title, content, id }; // 게시글 데이터 구성
 
       await PostStorage.savePost(post); // 게시글을 DB에 저장
