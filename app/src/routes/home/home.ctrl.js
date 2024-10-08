@@ -4,6 +4,10 @@ const User = require("../../models/User");
 const PostStorage = require("../../models/PostStorage");
 const MessageStorage = require("../../models/MessageStorage"); // MessageStorage를 불러옵니다.
 const { formatTime } = require("../../public/js/home/time");
+const path = require("path");
+const fs = require("fs");
+const { createObjectCsvWriter } = require("csv-writer");
+const MessageExtractor = require("../../models/extractMessages"); // MessageExtractor를 불러옵니다.
 
 const output = {
   home: (req, res) => {
@@ -69,34 +73,50 @@ const output = {
   },
 
   messageChat: async (req, res) => {
-    const roomid = req.query.roomid; // URL에서 roomid 가져오기
-    const sender = req.cookies.userid; // 로그인한 사용자 ID 가져오기
+    const roomid = req.query.roomid;
+    const sender = req.cookies.userid;
 
-    // roomid와 sender 값 검증
     if (!roomid || !sender) {
       return res.status(400).send("잘못된 요청입니다.");
     }
 
     try {
-      // 해당 roomid에 메시지를 가져오기
       let messages = await MessageStorage.getMessagesByRoomId(roomid);
 
-      // 메시지가 없을 경우 기본값으로 새 메시지 생성
       if (messages.length === 0) {
         await MessageStorage.createMessage(
           roomid,
-          1, // 기본 postnum, 나중에 실제 postnum으로 변경 필요
+          1,
           sender,
-          "상대방_아이디", // 실제 상대방 ID로 변경 필요
-          "첫 번째 메시지" // 기본 메시지
+          "상대방_아이디",
+          "첫 번째 메시지"
         );
-
-        // 새로 생성된 메시지를 다시 조회
         messages = await MessageStorage.getMessagesByRoomId(roomid);
       }
 
-      // 조회된 메시지를 렌더링
-      res.render("home/message_chat", { messages, roomid, sender });
+      const exportsDir = path.join(__dirname, "../../exports");
+      if (!fs.existsSync(exportsDir)) {
+        fs.mkdirSync(exportsDir, { recursive: true });
+      }
+
+      const csvFilePath = path.join(exportsDir, `messages_room_${roomid}.csv`);
+
+      // CSV 데이터 작성 (BOM 추가)
+      const csvHeaders = "보낸 사람,내용,보낸 시간\n";
+      const csvData = messages
+        .map((msg) => `${msg.sender},${msg.content},${msg.send_time}`)
+        .join("\n");
+
+      // UTF-8 BOM을 추가한 상태로 파일 저장
+      fs.writeFileSync(csvFilePath, "\uFEFF" + csvHeaders + csvData, "utf8");
+
+      // CSV 파일 다운로드 링크 제공
+      res.render("home/message_chat", {
+        messages,
+        roomid,
+        sender,
+        csvDownloadLink: `/exports/messages_room_${roomid}.csv`,
+      });
     } catch (err) {
       console.error("메시지 조회/생성 오류:", err);
       res.status(500).send("서버 오류 발생");
@@ -136,7 +156,7 @@ const process = {
       const id = "사용자 이름";
       const post = { title, content, id }; // 게시글 데이터 구성
 
-      await PostStorage.savePost(post); // 게시글을 DB에 저장P
+      await PostStorage.savePost(post); // 게시글을 DB에 저장
       res.json({ success: true }); // 게시글 작성 후 게시글 목록으로 리다이렉트
     } catch (err) {
       console.error("게시글 작성 오류:", err);
@@ -155,6 +175,7 @@ const process = {
       res.status(500).json({ success: false, message: "게시글 삭제 실패" }); // 삭제 실패 시 오류 메시지 반환
     }
   },
+
   sendMessage: async (req, res) => {
     const { roomid, content } = req.body;
     const sender = req.cookies.userid; // 로그인한 사용자 ID 가져오기
@@ -178,6 +199,16 @@ const process = {
     } catch (err) {
       console.error("메시지 저장 오류:", err);
       res.status(500).send("서버 오류 발생");
+    }
+  },
+
+  extractMessages: async (req, res) => {
+    const messageExtractor = new MessageExtractor(req.body); // POST 요청으로 들어온 데이터 처리
+    const result = await messageExtractor.extract();
+    if (result.success) {
+      return res.download(result.filePath); // 성공 시 CSV 파일 다운로드
+    } else {
+      return res.status(400).send(result.msg); // 실패 시 오류 메시지 반환
     }
   },
 };
