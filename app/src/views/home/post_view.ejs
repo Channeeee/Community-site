@@ -103,31 +103,80 @@
             opacity: 0.9;
         }
 
+        /* 댓글 섹션 디자인 */
         .comment-section {
             margin-top: 30px;
+            padding: 20px;
+            background-color: #2e2e2e;
+            border-radius: 10px;
+        }
+
+        .comment-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .comment-list li {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background-color: #444;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .comment-list li .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .comment-list li .comment-content {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        /* 대댓글 스타일링 */
+        .comment-list li.reply {
+            margin-left: 10px;
+            list-style: none;
+            background-color: #555;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .comment-section textarea {
             width: 97%;
             padding: 10px;
             border-radius: 5px;
-            border: 1px solid #555;
-            background-color: #555;
+            border: 1px solid #888;
+            background-color: #444;
             color: #fff;
             font-size: 16px;
+            margin-top: 10px;
             margin-bottom: 10px;
             resize: none;
         }
 
         .comment-section button {
-            padding: 10px 20px;
-            background-color: #ffcc00;
-            color: #333;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        padding: 4px 10px;  /* 크기를 작게 조정 */
+        background-color: #ffcc00;
+        color: #333;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-left: -5px;  /* 왼쪽으로 이동 */
+        transition: background-color 0.3s ease;
         }
+
 
         input[type="text"]:focus,
         textarea:focus {
@@ -136,7 +185,7 @@
         }
 
         .comment-section button:hover {
-            opacity: 0.9;
+            background-color: #e6b800;
         }
     </style>
 </head>
@@ -168,36 +217,93 @@
             <button class="button-delete" onclick="deletePost('<%= post.postnum %>')">삭제</button>
         </div>
 
-        
         <div class="comment-section">
-            <textarea id="comment" rows="4" placeholder="댓글을 입력하세요."></textarea>
-            <button>댓글 작성</button>
+            <h3>댓글</h3>
+            <ul id="commentList" class="comment-list">
+                <% if (parentComments && parentComments.length > 0) { %>
+                    <% parentComments.forEach(function(comment) { %>
+                        <!-- 부모 댓글 -->
+                        <li class="comment">
+                            <div class="comment-meta">
+                                <strong><%= comment.member_id %></strong> <span><%= new Date(comment.date).toLocaleString() %></span>
+                            </div>
+                            <div class="comment-content">
+                                <%= comment.comment %>
+                            </div>
+                            <button onclick="showReplyForm('<%= comment.commentsID %>')">대댓글</button>
+                            <!-- 대댓글 입력 폼 -->
+                            <form id="replyForm_<%= comment.commentsID %>" class="reply-form" action="/post/<%= post.postnum %>/comment" method="post" style="display: none;">
+                                <input type="hidden" name="parentnum" value="<%= comment.commentsID %>">
+                                <textarea name="comment" placeholder="대댓글을 입력하세요..." required></textarea>
+                                <button type="submit">대댓글 작성</button>
+                            </form>
+
+                            <!-- 해당 댓글의 대댓글 표시 -->
+                            <ul>
+                                <% replies.forEach(function(reply) { %>
+                                    <% if (reply.parentnum == comment.commentsID) { %> <!-- 부모 댓글과 연관된 대댓글만 표시 -->
+                                        <li class="reply">
+                                            <div class="comment-meta">
+                                                <strong><%= reply.member_id %></strong> <span><%= new Date(reply.date).toLocaleString() %></span>
+                                            </div>
+                                            <div class="comment-content">
+                                                <%= reply.comment %>
+                                            </div>
+                                        </li>
+                                    <% } %>
+                                <% }) %>
+                            </ul>
+                        </li>
+                    <% }) %>
+                <% } else { %>
+                    <li>댓글이 없습니다.</li>
+                <% } %>
+            </ul>
+
+            <!-- 일반 댓글 작성 폼 -->
+            <form action="/post/<%= post.postnum %>/comment" method="post">
+                <input type="hidden" name="parentnum" value="0"> <!-- 일반 댓글은 parentnum이 0 -->
+                <textarea name="comment" placeholder="댓글을 입력하세요..." required></textarea>
+                <button type="submit">댓글 작성</button>
+            </form>
         </div>
-    </div>
 
-    <script>
-        // 게시글 삭제 기능 구현
-        function deletePost(postId) {
-            if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-                fetch(`/delete-post/${postId}`, {
-                    method: 'DELETE',
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("게시글이 삭제되었습니다.");
-                        window.location.href = '/community';  // 삭제 후 게시글 목록으로 이동
-                    } else {
-                        alert("게시글 삭제에 실패했습니다.");
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("서버 오류가 발생했습니다.");
-                });
+        <script>
+            // 대댓글 입력 폼을 표시하는 함수
+            function showReplyForm(commentID) {
+                var form = document.getElementById('replyForm_' + commentID);
+                if (form.style.display === 'none' || form.style.display === '') {
+                    form.style.display = 'block'; // 폼을 보이게
+                } else {
+                    form.style.display = 'none'; // 폼을 숨기게
+                }
             }
-        }
-    </script>
+        </script>
 
+        <script>
+            // 게시글 삭제 기능 구현
+            function deletePost(postId) {
+                if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+                    fetch(`/delete-post/${postId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("게시글이 삭제되었습니다.");
+                            window.location.href = '/community';  // 삭제 후 게시글 목록으로 이동
+                        } else {
+                            alert("게시글 삭제에 실패했습니다.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("서버 오류가 발생했습니다.");
+                    });
+                }
+            }
+        </script>
+
+    </div>
 </body>
 </html>

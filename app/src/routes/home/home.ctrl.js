@@ -8,12 +8,13 @@ const path = require("path");
 const fs = require("fs");
 const { createObjectCsvWriter } = require("csv-writer");
 const MessageExtractor = require("../../models/extractMessages"); // MessageExtractor를 불러옵니다.
+const CommentStorage = require("../../models/CommentStorage"); // 댓글 작성 기능
 
 const output = {
   home: (req, res) => {
     res.render("home/index");
   },
-
+  
   board: (req, res) => {
     res.render("home/board");
   },
@@ -41,25 +42,31 @@ const output = {
     }
   },
 
-  postView: (req, res) => {
-    const postId = req.query.id; // URL에서 postnum을 가져옴
-    console.log("postId:", postId); // postId 값 출력 확인
+  postView: async (req, res) => {
+    try {
+      const postId = req.params.id; // URL에서 postnum을 가져옴
+      console.log("postId:", postId); // postId 값 출력 확인
 
-    if (!postId) {
-      return res.status(400).send("잘못된 요청입니다.");
+      if (!postId) {
+        console.log("No postId found in request");  // 추가된 디버깅 메시지
+        return res.status(400).send("잘못된 요청입니다.");
+      }
+
+      // 게시글과 댓글을 가져옴
+      const post = await PostStorage.getPostById(postId);
+      const comments = await CommentStorage.getCommentsByPostId(postId);
+
+      if (!post) {
+        console.log("No post found for postId:", postId);  // 추가된 디버깅 메시지
+        return res.status(404).send("해당 게시글을 찾을 수 없습니다.");
+      }
+
+      // 게시글과 댓글을 함께 전달
+      res.render("home/post_view", { post, comments });
+    } catch (err) {
+      console.error("게시글 조회 오류:", err);
+      res.status(500).send("서버 오류 발생");
     }
-
-    PostStorage.getPostById(postId)
-      .then((post) => {
-        if (!post) {
-          return res.status(404).send("해당 게시글을 찾을 수 없습니다.");
-        }
-        res.render("home/post_view", { post, postId });
-      })
-      .catch((err) => {
-        console.error("Error fetching post:", err);
-        res.status(500).send("서버 오류 발생");
-      });
   },
 
   community: async (req, res) => {
@@ -211,9 +218,79 @@ const process = {
       return res.status(400).send(result.msg); // 실패 시 오류 메시지 반환
     }
   },
+
+  writeComment: async (req, res) => {
+    try {
+      const { comment, parentnum } = req.body; // 클라이언트에서 전송된 댓글 내용과 부모 댓글 번호
+      const postnum = req.params.id;  // URL에서 게시글 번호를 가져옴
+      const member_id = req.cookies.userid;  // 현재 로그인한 사용자 ID를 쿠키에서 가져옴
+  
+      let ref;
+  
+      // 대댓글인 경우 상위 댓글의 ref 값을 상속받음
+      if (parentnum && parentnum !== '0') {
+        const parentComment = await CommentStorage.getCommentById(parentnum);
+        ref = parentComment ? parentComment.ref : postnum;  // 상위 댓글의 ref 값 사용
+      } else {
+        // 일반 댓글인 경우 게시글 번호를 ref로 설정
+        ref = postnum;
+      }
+  
+      // 댓글 데이터 구성
+      const commentData = {
+        comment: comment,
+        board_id: postnum,  // 게시글 ID
+        member_id: member_id,  // 댓글 작성자 ID
+        modify_regdate: new Date(),  // 수정 날짜
+        date: new Date(),  // 작성 날짜
+        answernum: 0,  // 기본값으로 설정 (답글 구조일 경우 변경)
+        parentnum: parentnum || 0,  // 부모 댓글 번호가 없으면 0
+        ref: ref,  // ref 값 설정 (상위 댓글이 있으면 상위 댓글의 ref, 없으면 게시글 번호)
+        step: 0  // 기본값으로 설정
+      };
+  
+      // 댓글 저장 로직 (CommentStorage의 saveComment 함수 사용)
+      await CommentStorage.saveComment(commentData);
+      
+      // 댓글 작성 후 해당 게시글로 리다이렉트
+      res.redirect(`/post/${postnum}`);
+    } catch (err) {
+      console.error("댓글 작성 오류:", err);
+      res.status(500).send("댓글 작성 실패");
+    }
+  }
 };
+
+const postDetail = async (req, res) => {
+  try {
+    const postId = req.params.id; // URL에서 게시글 ID를 가져옴
+    const post = await PostStorage.getPostById(postId); // 게시글 정보를 DB에서 가져옴
+    const comments = await CommentStorage.getCommentsByPostId(postId); // 해당 게시글의 댓글을 DB에서 가져옴
+
+    if (!post) {
+      return res.status(404).send("해당 게시글을 찾을 수 없습니다.");
+    }
+
+    // 부모 댓글과 대댓글을 분리
+    const parentComments = comments.filter(comment => parseInt(comment.parentnum) === 0);  // parentnum을 숫자로 변환하여 비교
+    const replies = comments.filter(comment => parseInt(comment.parentnum) !== 0);
+
+    // 댓글 데이터 로그 출력
+    console.log('comments:', comments);
+    console.log('parentComments:', parentComments);
+    console.log('replies:', replies);
+
+    // 댓글과 대댓글을 EJS 템플릿으로 전달
+    res.render("home/post_view", { post, parentComments, replies });
+  } catch (err) {
+    console.error("게시글 조회 오류:", err);
+    res.status(500).send("서버 오류 발생");
+  }
+};
+
 
 module.exports = {
   output,
   process,
+  postDetail // 게시글 조회 함수
 };

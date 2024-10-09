@@ -32,6 +32,7 @@ app.use(cookieParser());
 app.use(morgan(":method", { stream: accessLogStream }, "dev"));
 app.use("/", home);
 
+
 // ------------------------ 쿠키 ----------------------- //
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,7 +53,8 @@ app.post("/", (req, res) => {
 });
 
 app.get("/delete", (req, res) => {
-  res.clearCookie("id").redirect("/");
+  res.clearCookie("userid").redirect("/"); // 쿠키 이름 'userid'로 수정
 });
+
 
 module.exports = app;
