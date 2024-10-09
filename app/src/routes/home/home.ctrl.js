@@ -275,11 +275,6 @@ const postDetail = async (req, res) => {
     const parentComments = comments.filter(comment => parseInt(comment.parentnum) === 0);  // parentnum을 숫자로 변환하여 비교
     const replies = comments.filter(comment => parseInt(comment.parentnum) !== 0);
 
-    // 댓글 데이터 로그 출력
-    console.log('comments:', comments);
-    console.log('parentComments:', parentComments);
-    console.log('replies:', replies);
-
     // 댓글과 대댓글을 EJS 템플릿으로 전달
     res.render("home/post_view", { post, parentComments, replies });
   } catch (err) {
