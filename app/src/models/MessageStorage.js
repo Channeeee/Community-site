@@ -1,6 +1,39 @@
 const db = require("../config/db");
 
 class MessageStorage {
+
+  static async saveMessageList({ postnum, sender, reciper }) {
+    return new Promise((resolve, reject) => {
+        const query = `
+            INSERT INTO message_list (postnum, sender, reciper, created_at)
+            VALUES (?, ?, ?, NOW())
+        `;
+        db.query(query, [postnum, sender, reciper], (err, result) => {
+            if (err) {
+                console.error("메시지 저장 오류:", err);
+                reject(err);
+            } else {
+                resolve({ success: true });
+            }
+        });
+    });
+}
+
+static async getMessagesByPostnum(postnum) {
+    return new Promise((resolve, reject) => {
+        const query = `
+            SELECT * FROM message_list WHERE postnum = ?
+        `;
+        db.query(query, [postnum], (err, results) => {
+            if (err) {
+                console.error("메시지 조회 오류:", err);
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
   // 메시지를 roomid를 기준으로 조회
   static async getMessagesByRoomId(roomid) {
     const query = `

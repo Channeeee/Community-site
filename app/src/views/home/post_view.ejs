@@ -212,7 +212,7 @@
 
         <div class="form-actions">
             <!-- 스크랩, 글 목록, 삭제 버튼 -->
-            <button class="button-scrap" onclick="scrapPost()">스크랩</button>
+            <button onclick="sendMessage('<%= post.postnum %>', '<%= post.writer_id %>')" class="button-scrap">쪽지</button>
             <button class="button-list" onclick="location.href='/community'">글 목록</button>
             <button class="button-delete" onclick="deletePost('<%= post.postnum %>')">삭제</button>
         </div>
@@ -279,6 +279,25 @@
                 }
             }
         </script>
+
+<script>
+    function sendMessage(postnum, reciper) {
+        const sender = getCookie('userid'); // 쿠키에서 로그인한 사용자 ID를 가져옴
+        if (!sender) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
+        // 새 경로로 이동하며, 필요한 정보를 쿼리 스트링으로 전달
+        location.href = `/message_list?postnum=${postnum}&reciper=${reciper}&sender=${sender}`;
+    }
+    
+    // 쿠키 값을 가져오는 함수
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    </script>
 
         <script>
             // 게시글 삭제 기능 구현

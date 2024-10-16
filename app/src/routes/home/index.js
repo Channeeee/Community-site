@@ -2,7 +2,6 @@
 
 const express = require("express");
 const router = express.Router();
-
 const ctrl = require("./home.ctrl");
 
 router.get("/", ctrl.output.home);
@@ -32,5 +31,8 @@ router.post("/message/chat/extract", ctrl.process.extractMessages); // 새로운
 
 // 댓글 작성 POST 요청 처리
 router.post("/post/:id/comment", ctrl.process.writeComment); // 댓글 작성 경로 추가
+
+// messageList로 변경한 함수 사용
+router.get("/message_list", ctrl.output.messageList);
 
 module.exports = router;

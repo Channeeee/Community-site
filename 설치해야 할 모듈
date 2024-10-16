@@ -1,9 +1,0 @@
-npm i express path app-root-path bcrypt body-parser dotenv morgan mysql winston ejs nunjucks cookie-parser chokidar
-npm install mysql2
-.env 자기 mysql 정보에 맞게 수정
-
-
-vscode 터미널 창에 복붙
-
-서버 실행 방법: 터미널 창에 cd app 입력 후 nodemon ./bin/www.js 입력
-node.js 설치 필수

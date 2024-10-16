@@ -27,6 +27,34 @@ const output = {
     res.render("home/register");
   },
 
+  messageList: async (req, res) => { // 함수 이름을 messageList로 변경
+    try {
+        const { postnum, reciper, sender } = req.query;
+
+        // 파라미터가 제대로 들어왔는지 로그로 확인
+        console.log("postnum:", postnum);
+        console.log("reciper:", reciper);
+        console.log("sender:", sender);
+
+        if (!sender) {
+            return res.status(401).send("로그인이 필요합니다."); // 로그인되지 않은 경우 처리
+        }
+
+        // message_list에 해당 정보 저장
+        const saveResult = await MessageStorage.saveMessageList({ postnum, sender, reciper });
+        console.log("Message save result:", saveResult);
+
+        // 해당 게시물의 쪽지 목록을 DB에서 가져옴
+        const messages = await MessageStorage.getMessagesByPostnum(postnum);
+
+        // 가져온 쪽지 데이터를 EJS에 전달하여 렌더링
+        res.render("home/message", { messages, postnum, sender, reciper });
+    } catch (err) {
+        console.error("쪽지 생성 오류:", err); // 구체적인 오류를 콘솔에 출력
+        res.status(500).send("서버 오류 발생");
+    }
+},
+
   message: async (req, res) => {
     try {
       const userid = req.cookies.userid; // 쿠키에서 userid 값을 가져옴
@@ -35,7 +63,8 @@ const output = {
       }
 
       const messages = await MessageStorage.getMessagesForUser(userid); // 해당 사용자의 쪽지 가져오기
-      res.render("home/message", { messages }); // 가져온 쪽지 데이터를 EJS에 전달
+    
+      res.render("home/message", { messages}); // 가져온 쪽지 데이터를 EJS에 전달
     } catch (err) {
       console.error("쪽지 리스트 불러오기 오류:", err);
       res.status(500).send("서버 오류 발생");
