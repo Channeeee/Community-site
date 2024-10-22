@@ -14,7 +14,7 @@ const output = {
   home: (req, res) => {
     res.render("home/index");
   },
-  
+
   board: (req, res) => {
     res.render("home/board");
   },
@@ -27,33 +27,38 @@ const output = {
     res.render("home/register");
   },
 
-  messageList: async (req, res) => { // 함수 이름을 messageList로 변경
+  messageList: async (req, res) => {
+    // 함수 이름을 messageList로 변경
     try {
-        const { postnum, reciper, sender } = req.query;
+      const { postnum, reciper, sender } = req.query;
 
-        // 파라미터가 제대로 들어왔는지 로그로 확인
-        console.log("postnum:", postnum);
-        console.log("reciper:", reciper);
-        console.log("sender:", sender);
+      // 파라미터가 제대로 들어왔는지 로그로 확인
+      console.log("postnum:", postnum);
+      console.log("reciper:", reciper);
+      console.log("sender:", sender);
 
-        if (!sender) {
-            return res.status(401).send("로그인이 필요합니다."); // 로그인되지 않은 경우 처리
-        }
+      if (!sender) {
+        return res.status(401).send("로그인이 필요합니다."); // 로그인되지 않은 경우 처리
+      }
 
-        // message_list에 해당 정보 저장
-        const saveResult = await MessageStorage.saveMessageList({ postnum, sender, reciper });
-        console.log("Message save result:", saveResult);
+      // message_list에 해당 정보 저장
+      const saveResult = await MessageStorage.saveMessageList({
+        postnum,
+        sender,
+        reciper,
+      });
+      console.log("Message save result:", saveResult);
 
-        // 해당 게시물의 쪽지 목록을 DB에서 가져옴
-        const messages = await MessageStorage.getMessagesByPostnum(postnum);
+      // 해당 게시물의 쪽지 목록을 DB에서 가져옴
+      const messages = await MessageStorage.getMessagesByPostnum(postnum);
 
-        // 가져온 쪽지 데이터를 EJS에 전달하여 렌더링
-        res.render("home/message", { messages, postnum, sender, reciper });
+      // 가져온 쪽지 데이터를 EJS에 전달하여 렌더링
+      res.render("home/message", { messages, postnum, sender, reciper });
     } catch (err) {
-        console.error("쪽지 생성 오류:", err); // 구체적인 오류를 콘솔에 출력
-        res.status(500).send("서버 오류 발생");
+      console.error("쪽지 생성 오류:", err); // 구체적인 오류를 콘솔에 출력
+      res.status(500).send("서버 오류 발생");
     }
-},
+  },
 
   message: async (req, res) => {
     try {
@@ -63,8 +68,8 @@ const output = {
       }
 
       const messages = await MessageStorage.getMessagesForUser(userid); // 해당 사용자의 쪽지 가져오기
-    
-      res.render("home/message", { messages}); // 가져온 쪽지 데이터를 EJS에 전달
+
+      res.render("home/message", { messages }); // 가져온 쪽지 데이터를 EJS에 전달
     } catch (err) {
       console.error("쪽지 리스트 불러오기 오류:", err);
       res.status(500).send("서버 오류 발생");
@@ -77,7 +82,7 @@ const output = {
       console.log("postId:", postId); // postId 값 출력 확인
 
       if (!postId) {
-        console.log("No postId found in request");  // 추가된 디버깅 메시지
+        console.log("No postId found in request"); // 추가된 디버깅 메시지
         return res.status(400).send("잘못된 요청입니다.");
       }
 
@@ -86,7 +91,7 @@ const output = {
       const comments = await CommentStorage.getCommentsByPostId(postId);
 
       if (!post) {
-        console.log("No post found for postId:", postId);  // 추가된 디버깅 메시지
+        console.log("No post found for postId:", postId); // 추가된 디버깅 메시지
         return res.status(404).send("해당 게시글을 찾을 수 없습니다.");
       }
 
@@ -118,17 +123,6 @@ const output = {
 
     try {
       let messages = await MessageStorage.getMessagesByRoomId(roomid);
-
-      if (messages.length === 0) {
-        await MessageStorage.createMessage(
-          roomid,
-          1,
-          sender,
-          "상대방_아이디",
-          "첫 번째 메시지"
-        );
-        messages = await MessageStorage.getMessagesByRoomId(roomid);
-      }
 
       const exportsDir = path.join(__dirname, "../../exports");
       if (!fs.existsSync(exportsDir)) {
@@ -251,43 +245,43 @@ const process = {
   writeComment: async (req, res) => {
     try {
       const { comment, parentnum } = req.body; // 클라이언트에서 전송된 댓글 내용과 부모 댓글 번호
-      const postnum = req.params.id;  // URL에서 게시글 번호를 가져옴
-      const member_id = req.cookies.userid;  // 현재 로그인한 사용자 ID를 쿠키에서 가져옴
-  
+      const postnum = req.params.id; // URL에서 게시글 번호를 가져옴
+      const member_id = req.cookies.userid; // 현재 로그인한 사용자 ID를 쿠키에서 가져옴
+
       let ref;
-  
+
       // 대댓글인 경우 상위 댓글의 ref 값을 상속받음
-      if (parentnum && parentnum !== '0') {
+      if (parentnum && parentnum !== "0") {
         const parentComment = await CommentStorage.getCommentById(parentnum);
-        ref = parentComment ? parentComment.ref : postnum;  // 상위 댓글의 ref 값 사용
+        ref = parentComment ? parentComment.ref : postnum; // 상위 댓글의 ref 값 사용
       } else {
         // 일반 댓글인 경우 게시글 번호를 ref로 설정
         ref = postnum;
       }
-  
+
       // 댓글 데이터 구성
       const commentData = {
         comment: comment,
-        board_id: postnum,  // 게시글 ID
-        member_id: member_id,  // 댓글 작성자 ID
-        modify_regdate: new Date(),  // 수정 날짜
-        date: new Date(),  // 작성 날짜
-        answernum: 0,  // 기본값으로 설정 (답글 구조일 경우 변경)
-        parentnum: parentnum || 0,  // 부모 댓글 번호가 없으면 0
-        ref: ref,  // ref 값 설정 (상위 댓글이 있으면 상위 댓글의 ref, 없으면 게시글 번호)
-        step: 0  // 기본값으로 설정
+        board_id: postnum, // 게시글 ID
+        member_id: member_id, // 댓글 작성자 ID
+        modify_regdate: new Date(), // 수정 날짜
+        date: new Date(), // 작성 날짜
+        answernum: 0, // 기본값으로 설정 (답글 구조일 경우 변경)
+        parentnum: parentnum || 0, // 부모 댓글 번호가 없으면 0
+        ref: ref, // ref 값 설정 (상위 댓글이 있으면 상위 댓글의 ref, 없으면 게시글 번호)
+        step: 0, // 기본값으로 설정
       };
-  
+
       // 댓글 저장 로직 (CommentStorage의 saveComment 함수 사용)
       await CommentStorage.saveComment(commentData);
-      
+
       // 댓글 작성 후 해당 게시글로 리다이렉트
       res.redirect(`/post/${postnum}`);
     } catch (err) {
       console.error("댓글 작성 오류:", err);
       res.status(500).send("댓글 작성 실패");
     }
-  }
+  },
 };
 
 const postDetail = async (req, res) => {
@@ -301,8 +295,12 @@ const postDetail = async (req, res) => {
     }
 
     // 부모 댓글과 대댓글을 분리
-    const parentComments = comments.filter(comment => parseInt(comment.parentnum) === 0);  // parentnum을 숫자로 변환하여 비교
-    const replies = comments.filter(comment => parseInt(comment.parentnum) !== 0);
+    const parentComments = comments.filter(
+      (comment) => parseInt(comment.parentnum) === 0
+    ); // parentnum을 숫자로 변환하여 비교
+    const replies = comments.filter(
+      (comment) => parseInt(comment.parentnum) !== 0
+    );
 
     // 댓글과 대댓글을 EJS 템플릿으로 전달
     res.render("home/post_view", { post, parentComments, replies });
@@ -312,9 +310,8 @@ const postDetail = async (req, res) => {
   }
 };
 
-
 module.exports = {
   output,
   process,
-  postDetail // 게시글 조회 함수
+  postDetail, // 게시글 조회 함수
 };
