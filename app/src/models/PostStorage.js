@@ -3,16 +3,49 @@
 const db = require("../config/db");
 
 class PostStorage {
-    // 모든 게시글을 가져오는 메소드
     static async getPosts() {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM posts";
             db.query(query, (err, data) => {
                 if (err) reject(`${err}`);
-                resolve(data); // 가져온 게시글 데이터를 반환
+                
+                // report가 1인 게시글을 "차단된 게시글입니다"로 처리
+                const processedPosts = data.map((post) => {
+                    if (post.report === 1) {
+                        post.title = "차단된 게시글입니다";
+                        post.content = "차단된 게시글입니다";
+                    }
+                    return post;
+                });
+                
+                resolve(processedPosts); // 처리된 게시글 데이터를 반환
             });
         });
     }
+
+    static getProfanePostCount() {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT COUNT(*) AS count FROM posts WHERE report = 1";
+            db.query(query, (err, result) => {
+                if (err) reject(err);
+                resolve(result[0].count);
+            });
+        });
+    }
+
+    static getProfanePosts() {
+        return new Promise((resolve, reject) => {
+            const query = `
+            SELECT posts.title, posts.content, posts.id AS author
+            FROM posts
+            WHERE posts.report = 1`;
+            db.query(query, (err, results) => {
+                if (err) reject(`${err}`);
+                resolve(results);
+            });
+        });
+    }
+
 
     // 특정 ID의 게시글을 가져오는 메소드
     static async getPostById(id) {
@@ -27,6 +60,11 @@ class PostStorage {
                     console.log("No post found with postnum:", id);
                     return resolve(null);  // 게시글이 없을 때 처리
                 }
+                // report가 1이면 "차단된 메시지입니다"로 처리
+            if (data[0].report === 1) {
+                data[0].title = "차단된 게시글입니다";
+                data[0].content = "차단된 게시글입니다";
+                }
                 resolve(data[0]); // 첫 번째 게시글 반환
             });
         });
@@ -36,14 +74,15 @@ class PostStorage {
 
     // 새로운 게시글을 저장하는 메소드
     static async savePost(post) {
-        return new Promise((resolve, reject) => {
-            const query = "INSERT INTO posts (title, content, id) VALUES (?, ?, ?)";
-            db.query(query, [post.title, post.content, post.id], (err, data) => {
-                if (err) reject(`${err}`);
-                resolve({ success: true }); // 성공적으로 저장되면 성공 응답 반환
-            });
+    return new Promise((resolve, reject) => {
+        const query = "INSERT INTO posts (title, content, id, report) VALUES (?, ?, ?, ?)";
+        db.query(query, [post.title, post.content, post.id, post.report], (err, data) => {
+            if (err) reject(`${err}`);
+            resolve({ success: true });
         });
-    }
+    });
+}
+
 
     // 특정 ID의 게시글을 삭제하는 메소드
     static async deletePost(postnum) {
