@@ -20,7 +20,7 @@ router.get("/profane_messages", ctrl.output.profaneMessages);
 router.get("/message", ctrl.output.message); // 통합된 쪽지 경로
 
 // 게시글 상세보기 처리 추가
-router.get("/post/:id", ctrl.postDetail);  // 여기에 GET 요청 라우트 추가
+router.get("/post/:id", ctrl.postDetail); // 여기에 GET 요청 라우트 추가
 
 // POST 요청 처리 추가
 router.post("/board/write", ctrl.process.writePost); // board/write 경로 추가
@@ -30,9 +30,6 @@ router.post("/register", ctrl.process.register);
 
 // 게시글 삭제 처리
 router.delete("/delete-post/:postnum", ctrl.process.deletePost);
-
-// 메시지 추출 처리 추가
-router.post("/message/chat/extract", ctrl.process.extractMessages); // 새로운 경로 추가
 
 // 댓글 작성 POST 요청 처리
 router.post("/post/:id/comment", ctrl.process.writeComment); // 댓글 작성 경로 추가

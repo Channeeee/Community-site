@@ -7,36 +7,34 @@ const { formatTime } = require("../../public/js/home/time");
 const path = require("path");
 const fs = require("fs");
 const { createObjectCsvWriter } = require("csv-writer");
-const MessageExtractor = require("../../models/extractMessages"); // MessageExtractor를 불러옵니다.
 const CommentStorage = require("../../models/CommentStorage"); // 댓글 작성 기능
 const axios = require("axios");
 
 const apiUrl = "https://9a5c605fdc02.ngrok.app/predict";
 
-
 const output = {
   home: async (req, res) => {
-      try {
-          const profanePostCount = await PostStorage.getProfanePostCount();
-          const profaneCommentCount = await CommentStorage.getProfaneCommentCount();
-          const profaneMessageCount = await MessageStorage.getProfaneMessageCount();
+    try {
+      const profanePostCount = await PostStorage.getProfanePostCount();
+      const profaneCommentCount = await CommentStorage.getProfaneCommentCount();
+      const profaneMessageCount = await MessageStorage.getProfaneMessageCount();
 
-          const profanePosts = await PostStorage.getProfanePosts();
-          const profaneMessages = await MessageStorage.getProfaneMessages();
-          const profaneComments = await CommentStorage.getProfaneComments();
+      const profanePosts = await PostStorage.getProfanePosts();
+      const profaneMessages = await MessageStorage.getProfaneMessages();
+      const profaneComments = await CommentStorage.getProfaneComments();
 
-          res.render("home/index", {
-              profanePostCount,
-              profaneCommentCount,
-              profaneMessageCount,
-              profanePosts,
-              profaneMessages,
-              profaneComments,
-          });
-      } catch (err) {
-          console.error(err);
-          res.status(500).send("서버 오류 발생");
-      }
+      res.render("home/index", {
+        profanePostCount,
+        profaneCommentCount,
+        profaneMessageCount,
+        profanePosts,
+        profaneMessages,
+        profaneComments,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("서버 오류 발생");
+    }
   },
 
   profanePosts: async (req, res) => {
@@ -69,35 +67,33 @@ const output = {
     }
   },
 
-
   board: (req, res) => {
     res.render("home/board");
   },
 
   login: async (req, res) => {
     try {
-        const profanePostCount = await PostStorage.getProfanePostCount();
-        const profaneCommentCount = await CommentStorage.getProfaneCommentCount();
-        const profaneMessageCount = await MessageStorage.getProfaneMessageCount();
+      const profanePostCount = await PostStorage.getProfanePostCount();
+      const profaneCommentCount = await CommentStorage.getProfaneCommentCount();
+      const profaneMessageCount = await MessageStorage.getProfaneMessageCount();
 
-        const profanePosts = await PostStorage.getProfanePosts(); // 비속어 게시글 리스트
-        const profaneMessages = await MessageStorage.getProfaneMessages();
-        const profaneComments = await CommentStorage.getProfaneComments();
+      const profanePosts = await PostStorage.getProfanePosts(); // 비속어 게시글 리스트
+      const profaneMessages = await MessageStorage.getProfaneMessages();
+      const profaneComments = await CommentStorage.getProfaneComments();
 
-        res.render("home/login", {
-            profanePostCount,
-            profaneCommentCount,
-            profaneMessageCount,
-            profanePosts,
-            profaneMessages,
-            profaneComments
-        });
+      res.render("home/login", {
+        profanePostCount,
+        profaneCommentCount,
+        profaneMessageCount,
+        profanePosts,
+        profaneMessages,
+        profaneComments,
+      });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("서버 오류 발생");
+      console.error(err);
+      res.status(500).send("서버 오류 발생");
     }
   },
-
 
   register: (req, res) => {
     res.render("home/register");
@@ -114,10 +110,21 @@ const output = {
 
       let messages;
       if (postnum && reciper && sender) {
-        console.log("postnum:", postnum, "reciper:", reciper, "sender:", sender); // 쿼리 파라미터 로그
+        console.log(
+          "postnum:",
+          postnum,
+          "reciper:",
+          reciper,
+          "sender:",
+          sender
+        ); // 쿼리 파라미터 로그
 
         // 중복 확인
-        const exists = await MessageStorage.checkMessageListExists(postnum, sender, reciper);
+        const exists = await MessageStorage.checkMessageListExists(
+          postnum,
+          sender,
+          reciper
+        );
         console.log("쪽지 리스트 중복 여부:", exists); // 중복 여부 확인 로그
 
         if (!exists) {
@@ -142,7 +149,6 @@ const output = {
       res.status(500).send("서버 오류 발생");
     }
   },
-
 
   postView: async (req, res) => {
     try {
@@ -250,32 +256,35 @@ const process = {
 
   writePost: async (req, res) => {
     try {
-        const { title, content } = req.body;
-        const id = req.cookies.userid;
+      const { title, content } = req.body;
+      const id = req.cookies.userid;
 
-        // 제목과 내용 모두에 대해 비속어 탐지 API 호출
-        const titlePrediction = await detectAbusiveLanguage(title);
-        const contentPrediction = await detectAbusiveLanguage(content);
+      // 제목과 내용 모두에 대해 비속어 탐지 API 호출
+      const titlePrediction = await detectAbusiveLanguage(title);
+      const contentPrediction = await detectAbusiveLanguage(content);
 
-        console.log("Title Prediction result:", titlePrediction);
-        console.log("Content Prediction result:", contentPrediction);
+      console.log("Title Prediction result:", titlePrediction);
+      console.log("Content Prediction result:", contentPrediction);
 
-        // 제목 또는 내용 중 하나라도 비속어가 포함된 경우 report를 1로 설정
-        const report = (
-            (titlePrediction && titlePrediction.prediction.result.includes("욕설입니다")) ||
-            (contentPrediction && contentPrediction.prediction.result.includes("욕설입니다"))
-        ) ? 1 : 0;
+      // 제목 또는 내용 중 하나라도 비속어가 포함된 경우 report를 1로 설정
+      const report =
+        (titlePrediction &&
+          titlePrediction.prediction.result.includes("욕설입니다")) ||
+        (contentPrediction &&
+          contentPrediction.prediction.result.includes("욕설입니다"))
+          ? 1
+          : 0;
 
-        const post = { title, content, id, report };
-        console.log("Report Value (expected 1 if abusive):", report);
+      const post = { title, content, id, report };
+      console.log("Report Value (expected 1 if abusive):", report);
 
-        await PostStorage.savePost(post);
-        res.json({ success: true });
+      await PostStorage.savePost(post);
+      res.json({ success: true });
     } catch (err) {
-        console.error("게시글 작성 오류:", err);
-        res.status(500).send("게시글 작성 실패");
+      console.error("게시글 작성 오류:", err);
+      res.status(500).send("게시글 작성 실패");
     }
-},
+  },
 
   deletePost: async (req, res) => {
     try {
@@ -297,13 +306,22 @@ const process = {
       const result = await MessageStorage.deleteMessagesByRoomId(roomId); // MessageStorage에서 메시지 삭제
 
       if (!result.success) {
-        return res.status(404).json({ success: false, message: "해당 roomid에 메시지가 없습니다." });
+        return res.status(404).json({
+          success: false,
+          message: "해당 roomid에 메시지가 없습니다.",
+        });
       }
 
-      res.json({ success: true, message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다." });
+      res.json({
+        success: true,
+        message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다.",
+      });
     } catch (err) {
       console.error("메시지 삭제 오류:", err);
-      res.status(500).json({ success: false, message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다." });
+      res.status(500).json({
+        success: false,
+        message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다.",
+      });
     }
   },
 
@@ -312,80 +330,82 @@ const process = {
     const sender = req.cookies.userid;
 
     if (!content || !roomid || !sender) {
-        return res.status(400).send("메시지 내용 또는 방 ID가 누락되었습니다.");
+      return res.status(400).send("메시지 내용 또는 방 ID가 누락되었습니다.");
     }
 
     try {
-        const postnum = 1;
+      const postnum = 1;
 
-        // 비속어 탐지 API 호출
-        const prediction = await detectAbusiveLanguage(content);
-        console.log("Prediction result:", prediction); // 예측 결과 로그 추가
+      // 비속어 탐지 API 호출
+      const prediction = await detectAbusiveLanguage(content);
+      console.log("Prediction result:", prediction); // 예측 결과 로그 추가
 
-        const report = (prediction && prediction.prediction.result.includes("욕설입니다")) ? 1 : 0;
-        console.log("Report Value (expected 1 if abusive):", report); // report 값 확인 로그
+      const report =
+        prediction && prediction.prediction.result.includes("욕설입니다")
+          ? 1
+          : 0;
+      console.log("Report Value (expected 1 if abusive):", report); // report 값 확인 로그
 
-        const reciper = await MessageStorage.getReciperByRoomId(roomid, sender);
-        await MessageStorage.createMessage(roomid, postnum, sender, content, report);
+      const reciper = await MessageStorage.getReciperByRoomId(roomid, sender);
+      await MessageStorage.createMessage(
+        roomid,
+        postnum,
+        sender,
+        content,
+        report
+      );
 
-        res.redirect(`/message_chat?roomid=${roomid}`);
+      res.redirect(`/message_chat?roomid=${roomid}`);
     } catch (err) {
-        console.error("메시지 저장 오류:", err);
-        res.status(500).send("서버 오류 발생");
-    }
-},
-
-  extractMessages: async (req, res) => {
-    const messageExtractor = new MessageExtractor(req.body); // POST 요청으로 들어온 데이터 처리
-    const result = await messageExtractor.extract();
-    if (result.success) {
-      return res.download(result.filePath); // 성공 시 CSV 파일 다운로드
-    } else {
-      return res.status(400).send(result.msg); // 실패 시 오류 메시지 반환
+      console.error("메시지 저장 오류:", err);
+      res.status(500).send("서버 오류 발생");
     }
   },
 
   writeComment: async (req, res) => {
     try {
-        const { comment, parentnum } = req.body;
-        const postnum = req.params.id;
-        const member_id = req.cookies.userid;
+      const { comment, parentnum } = req.body;
+      const postnum = req.params.id;
+      const member_id = req.cookies.userid;
 
-        // 비속어 탐지 API 호출
-        const prediction = await detectAbusiveLanguage(comment);
-        console.log("Prediction result:", prediction); // 예측 결과 로그 추가
+      // 비속어 탐지 API 호출
+      const prediction = await detectAbusiveLanguage(comment);
+      console.log("Prediction result:", prediction); // 예측 결과 로그 추가
 
-        const report = (prediction && prediction.prediction.result.includes("욕설입니다")) ? 1 : 0;
-        console.log("Report Value (expected 1 if abusive):", report); // report 값 확인 로그
+      const report =
+        prediction && prediction.prediction.result.includes("욕설입니다")
+          ? 1
+          : 0;
+      console.log("Report Value (expected 1 if abusive):", report); // report 값 확인 로그
 
-        let ref;
-        if (parentnum && parentnum !== "0") {
-            const parentComment = await CommentStorage.getCommentById(parentnum);
-            ref = parentComment ? parentComment.ref : postnum;
-        } else {
-            ref = postnum;
-        }
+      let ref;
+      if (parentnum && parentnum !== "0") {
+        const parentComment = await CommentStorage.getCommentById(parentnum);
+        ref = parentComment ? parentComment.ref : postnum;
+      } else {
+        ref = postnum;
+      }
 
-        const commentData = {
-            comment,
-            board_id: postnum,
-            member_id,
-            modify_regdate: new Date(),
-            date: new Date(),
-            answernum: 0,
-            parentnum: parentnum || 0,
-            ref,
-            step: 0,
-            report
-        };
+      const commentData = {
+        comment,
+        board_id: postnum,
+        member_id,
+        modify_regdate: new Date(),
+        date: new Date(),
+        answernum: 0,
+        parentnum: parentnum || 0,
+        ref,
+        step: 0,
+        report,
+      };
 
-        await CommentStorage.saveComment(commentData);
-        res.redirect(`/post/${postnum}`);
+      await CommentStorage.saveComment(commentData);
+      res.redirect(`/post/${postnum}`);
     } catch (err) {
-        console.error("댓글 작성 오류:", err);
-        res.status(500).send("댓글 작성 실패");
+      console.error("댓글 작성 오류:", err);
+      res.status(500).send("댓글 작성 실패");
     }
-},
+  },
 };
 
 const postDetail = async (req, res) => {
@@ -424,7 +444,6 @@ const detectAbusiveLanguage = async (text) => {
     throw error;
   }
 };
-
 
 module.exports = {
   output,
