@@ -1,0 +1,58 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id varchar [primary key]
+  name varchar
+  psword varchar
+  in_data timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table posts {
+  postnum integer [primary key]
+  id varchar
+  title varchar
+  contnt text [note: 'Content of the post']
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  report tinyint [note: 'Reported post status']
+}
+
+Table comments {
+  commentsID integer [primary key]
+  answernum integer
+  comment varchar
+  del blob [note: 'Deleted comment status']
+  modify_regdate datetime
+  parentnum varchar
+  ref varchar
+  date datetime
+  step varchar
+  board_id varchar
+  member_id varchar
+  report tinyint [note: 'Reported comment status']
+}
+
+Table message_list {
+  roomid integer [primary key]
+  postnum integer [ref: > posts.postnum]
+  sender varchar
+  reciper varchar
+  created_at timestamp
+}
+
+Table message {
+  messageid integer [primary key]
+  roomid integer [ref: > message_list.roomid]
+  send_time datetime
+  sender varchar
+  reciper varchar
+  content varchar
+  report tinyint [note: 'Reported message status']
+}
+
+// Relationships
+Ref: posts.id > users.id // many-to-one
+Ref: comments.board_id > posts.postnum // many-to-one
+Ref: comments.member_id > users.id // many-to-one
+Ref: message_list.postnum > posts.postnum // many-to-one
+Ref: message.roomid > message_list.roomid // many-to-one
