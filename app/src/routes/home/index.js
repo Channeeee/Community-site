@@ -40,4 +40,6 @@ router.post("/post/:id/comment", ctrl.process.writeComment); // 댓글 작성 �
 // messageList로 변경한 함수 사용
 // router.get("/message_list", ctrl.output.messageList);
 
+router.delete("/messages/room/:roomid", ctrl.process.deleteMessageByRoomId);
+
 module.exports = router;

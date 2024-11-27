@@ -168,6 +168,23 @@ class MessageStorage {
         throw err;
     }
   }
+  static async deleteMessagesByRoomId(roomId) {
+    try {
+      const query = "DELETE FROM message_list WHERE roomid = ?"; // roomid로 메시지 삭제
+      const [result] = await db.query(query, [roomId]);
+
+      if (result.affectedRows === 0) {
+        return { success: false }; // 삭제된 행이 없는 경우
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("roomid 기준 메시지 삭제 오류:", err);
+      throw err;
+    }
+  }
+
+
 }
 
 module.exports = MessageStorage;

@@ -11,7 +11,7 @@ const MessageExtractor = require("../../models/extractMessages"); // MessageExtr
 const CommentStorage = require("../../models/CommentStorage"); // 댓글 작성 기능
 const axios = require("axios");
 
-const apiUrl = "https://d806999957fd.ngrok.app/predict";
+const apiUrl = "https://9a5c605fdc02.ngrok.app/predict";
 
 
 const output = {
@@ -286,6 +286,24 @@ const process = {
     } catch (err) {
       console.error("게시글 삭제 오류:", err);
       res.status(500).json({ success: false, message: "게시글 삭제 실패" }); // 삭제 실패 시 오류 메시지 반환
+    }
+  },
+
+  deleteMessageByRoomId: async (req, res) => {
+    try {
+      const roomId = req.params.roomid; // 삭제할 메시지의 roomid
+      console.log("Deleting messages in room with ID:", roomId); // 디버깅 로그
+
+      const result = await MessageStorage.deleteMessagesByRoomId(roomId); // MessageStorage에서 메시지 삭제
+
+      if (!result.success) {
+        return res.status(404).json({ success: false, message: "해당 roomid에 메시지가 없습니다." });
+      }
+
+      res.json({ success: true, message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다." });
+    } catch (err) {
+      console.error("메시지 삭제 오류:", err);
+      res.status(500).json({ success: false, message: "roomid에 해당하는 메시지가 성공적으로 삭제되었습니다." });
     }
   },
 

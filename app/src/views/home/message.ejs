@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class="header">
-      <a href="/login" class="logo">KUCIS</a>
+      <a href="/login" class="logo">NGDB</a>
     </div>
 
     <div class="separator"></div>
@@ -29,7 +29,8 @@
                   <input type="hidden" name="roomid" value="<%= message.roomid %>" />
                   <button type="submit" class="button-view">보기</button>
                 </form>
-                <button class="button-delete">삭제</button>
+                <button class="button-delete" onclick="deleteMessagesByRoom('<%= message.roomid %>')">
+                  삭제</button>
               </div>
             </li>
           <% }); %>
@@ -39,4 +40,25 @@
       </ul>
     </div>
   </body>
+  <script>
+    function deleteMessagesByRoom(roomId) {
+    if (confirm("정말로 이 Room의 메시지를 모두 삭제하시겠습니까?")) {
+      fetch(`/messages/room/${roomId}`, {
+        method: "DELETE",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById(`room-${roomId}`).remove();
+          } else {
+            alert(data.message || "Room 메시지 삭제에 실패했습니다.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("오류가 발생했습니다. 다시 시도해주세요.");
+        });
+    }
+  }
+  </script>
 </html>
