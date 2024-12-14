@@ -1,58 +1,68 @@
-// Use DBML to define your database structure
-// Docs: https://dbml.dbdiagram.io/docs
+CREATE TABLE `comments` (
+  `commentsID` int unsigned NOT NULL AUTO_INCREMENT,
+  `postnum` int unsigned NOT NULL,
+  `user_id` varchar(30) NOT NULL,
+  `parent_id` int unsigned DEFAULT NULL,
+  `comment` varchar(255) NOT NULL,
+  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ref` varchar(45) NOT NULL,
+  `report` tinyint DEFAULT NULL,
+  PRIMARY KEY (`commentsID`),
+  KEY `postnum` (`postnum`),
+  KEY `comments_ibfk_2` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`postnum`) REFERENCES `posts` (`postnum`) ON DELETE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) 
 
-Table users {
-  id varchar [primary key]
-  name varchar
-  psword varchar
-  in_data timestamp [default: `CURRENT_TIMESTAMP`]
-}
+CREATE TABLE `message_list` (
+  `roomid` int unsigned NOT NULL AUTO_INCREMENT,
+  `postnum` int unsigned NOT NULL,
+  `sender_id` varchar(30) NOT NULL,
+  `reciver_id` varchar(30) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`roomid`),
+  KEY `postnum` (`postnum`),
+  KEY `sender_id` (`sender_id`),
+  KEY `message_list_ibfk_3` (`reciver_id`),
+  CONSTRAINT `message_list_ibfk_1` FOREIGN KEY (`postnum`) REFERENCES `posts` (`postnum`) ON DELETE CASCADE,
+  CONSTRAINT `message_list_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_list_ibfk_3` FOREIGN KEY (`reciver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+)
 
-Table posts {
-  postnum integer [primary key]
-  id varchar
-  title varchar
-  contnt text [note: 'Content of the post']
-  created_at timestamp [default: `CURRENT_TIMESTAMP`]
-  report tinyint [note: 'Reported post status']
-}
+CREATE TABLE `message` (
+  `messageid` int unsigned NOT NULL AUTO_INCREMENT,
+  `roomid` int unsigned NOT NULL,
+  `sender_id` varchar(30) NOT NULL,
+  `reciver_id` varchar(30) NOT NULL,
+  `content` text NOT NULL,
+  `send_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `report` tinyint DEFAULT NULL,
+  PRIMARY KEY (`messageid`),
+  KEY `roomid` (`roomid`),
+  KEY `sender_id` (`sender_id`),
+  KEY `message_ibfk_3` (`reciver_id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`roomid`) REFERENCES `message_list` (`roomid`) ON DELETE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_ibfk_3` FOREIGN KEY (`reciver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+)
 
-Table comments {
-  commentsID integer [primary key]
-  answernum integer
-  comment varchar
-  del blob [note: 'Deleted comment status']
-  modify_regdate datetime
-  parentnum varchar
-  ref varchar
-  date datetime
-  step varchar
-  board_id varchar
-  member_id varchar
-  report tinyint [note: 'Reported comment status']
-}
 
-Table message_list {
-  roomid integer [primary key]
-  postnum integer [ref: > posts.postnum]
-  sender varchar
-  reciper varchar
-  created_at timestamp
-}
+CREATE TABLE `posts` (
+  `postnum` int unsigned NOT NULL AUTO_INCREMENT,
+  `id` varchar(30) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `report` tinyint DEFAULT NULL,
+  PRIMARY KEY (`postnum`),
+  KEY `posts_ibfk_1` (`id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+)
 
-Table message {
-  messageid integer [primary key]
-  roomid integer [ref: > message_list.roomid]
-  send_time datetime
-  sender varchar
-  reciper varchar
-  content varchar
-  report tinyint [note: 'Reported message status']
-}
-
-// Relationships
-Ref: posts.id > users.id // many-to-one
-Ref: comments.board_id > posts.postnum // many-to-one
-Ref: comments.member_id > users.id // many-to-one
-Ref: message_list.postnum > posts.postnum // many-to-one
-Ref: message.roomid > message_list.roomid // many-to-one
+CREATE TABLE `users` (
+  `id` varchar(30) NOT NULL,
+  `name` varchar(30) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+)
